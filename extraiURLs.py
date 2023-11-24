@@ -3,12 +3,13 @@ Autor: Luiz Fernando Antonelli Galati
 '''
 
 '''
-Este código lê uma base de processos judiciais (documentos HTML) de Tribunais Regionais Eleitorais e imprime numa
-planilha .xlsx todas as URLs contidas nesses processos, juntamente com os contextos (trechos de texto) e os documentos
+Este código lê uma base de processos judiciais (documentos HTML) de Tribunais Regionais Eleitorais e imprime, numa
+planilha .xlsx, todas as URLs contidas nesses processos, juntamente com os contextos (trechos de texto) e os documentos
 específicos em que essas URLs aparecem. A base está organizada da seguinte maneira: os documentos de um mesmo processo
 estão reunidos em uma pasta cujo nome é o código desse processo; as pastas dos processos de um determinado TRE estão
 reunidas em uma pasta cujo nome especifica o TRE (jurisdição) em questão; as pastas de cada um dos TREs (jurisdições) 
 estão reunidas em uma única grande pasta.
+
 O  formato de impressão é o seguinte:
 Código do processo | Jurisdição | URL | Contexto | Documento
 '''
@@ -64,8 +65,7 @@ def montaListaLinksProcesso (caminhoProcesso):
     lista_links_processo = []
     
     for k in range (len (listaArquivos)):
-        caminhoArquivoAtual = caminhoProcesso + "/" + listaArquivos[k]
-        print (caminhoArquivoAtual + "\n")
+        caminhoArquivoAtual = caminhoProcesso + "/" + listaArquivos[k]        
             
         html = urlopen ("file:///" + caminhoArquivoAtual)
         res = BeautifulSoup (html.read (), "html5lib")        
@@ -176,18 +176,16 @@ def eliminaRepeticoes (lista_links_processo):
     return tam       
 
 
-def main ():
-    inicio = time.time ()
-
+def main ():   
     camDirAtual = os.getcwd ()
-    camDirJurisdicoes = camDirAtual + "/Decisoes_1496"
+    camDirJurisdicoes = camDirAtual + "/Decisoes"
 
-    novoArquivo = xlsxwriter.Workbook ("URLs26b.xlsx", {'strings_to_urls': False})
+    novoArquivo = xlsxwriter.Workbook ("URLs.xlsx", {'strings_to_urls': False})
     novaPlanilha = novoArquivo.add_worksheet ("URLs")
     escreveCabecalho (novaPlanilha)
     
-    novoArquivo2 = xlsxwriter.Workbook ("blacklist26b.xlsx", {'strings_to_urls': False})
-    novaPlanilha2 = novoArquivo2.add_worksheet ("blacklist")
+    novoArquivo2 = xlsxwriter.Workbook ("descarte.xlsx", {'strings_to_urls': False})
+    novaPlanilha2 = novoArquivo2.add_worksheet ("descarte")
     
     ultimaLinhaImpressa = 0    
     
@@ -220,11 +218,8 @@ def main ():
                 cont = 0
                 while (cont < tamListaLinksProcesso):
                     lugaresDeImpressao.append (3)
-                    cont = cont + 1           
-            
-                print (tamListaLinksProcesso)
-                print (lista_links_processo)
-            
+                    cont = cont + 1         
+                            
                 cont = 0
                 while (cont < tamListaLinksProcesso):
                     novaPlanilha.write (ultimaLinhaImpressa + cont + 1, 0, listaProcessos[j])
@@ -249,7 +244,7 @@ def main ():
                         cont = 0
                         while (cont < tamListaLinksProcesso):
                             if (texto.__contains__(lista_links_processo[cont]) and estruturaNaLista (lista_links_processo[cont], texto, lista_estruturas_impressas) == 0):
-                                # escrever no arquivo!
+                                # escrita no arquivo
                                 novaPlanilha.write (ultimaLinhaImpressa + cont + 1, lugaresDeImpressao[cont], textoAnt + texto)
                                 novaPlanilha.write (ultimaLinhaImpressa + cont + 1, lugaresDeImpressao[cont] + 1, listaArquivos[k])
                                 lugaresDeImpressao[cont] = lugaresDeImpressao[cont] + 2
@@ -261,9 +256,7 @@ def main ():
        
  
     novoArquivo.close ()
-    novoArquivo2.close ()
-
-    fim = time.time ()
-    print (fim - inicio)
+    novoArquivo2.close ()   
+    
 
 main ()
